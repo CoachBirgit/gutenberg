@@ -6,7 +6,7 @@ import { expect } from 'chai';
 /**
  * Internal dependencies
  */
-import serialize, { getCommentAttributes, getSaveContent, serializeValue } from '../serializer';
+import serialize, { getCommentAttributes, getSaveContent } from '../serializer';
 import { getBlockTypes, registerBlockType, unregisterBlockType } from '../registration';
 
 describe( 'block serializer', () => {
@@ -84,18 +84,6 @@ describe( 'block serializer', () => {
 			}, {} );
 
 			expect( attributes ).to.eql( { fruit: 'bananas' } );
-		} );
-	} );
-
-	describe( 'serializeValue()', () => {
-		it( 'should escape double-quotes', () => {
-			expect( serializeValue( 'a"b' ) ).to.equal( 'a\"b' );
-		} );
-
-		it( 'should escape hyphens', () => {
-			expect( serializeValue( '-' ) ).to.equal( '\u{5c}-' );
-			expect( serializeValue( '--' ) ).to.equal( '\u{5c}-\u{5c}-' );
-			expect( serializeValue( '\\-' ) ).to.equal( '\u{5c}\u{5c}-' );
 		} );
 	} );
 
