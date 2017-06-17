@@ -6,7 +6,7 @@ import { expect } from 'chai';
 /**
  * Internal dependencies
  */
-import serialize, { getCommentAttributes, getSaveContent } from '../serializer';
+import serialize, { getCommentAttributes, getSaveContent, serializeAttributes } from '../serializer';
 import { getBlockTypes, registerBlockType, unregisterBlockType } from '../registration';
 
 describe( 'block serializer', () => {
@@ -87,6 +87,21 @@ describe( 'block serializer', () => {
 		} );
 	} );
 
+	describe( 'serializeAttributes()', () => {
+		it( 'should not break HTML comments', () => {
+			expect( serializeAttributes( { a: '-- and --' } ) ).to.equal( '{"a":"\\u002d\\u002d and \\u002d\\u002d"}' );
+		} );
+		it( 'should not break standard-non-compliant tools for "<"', () => {
+			expect( serializeAttributes( { a: '< and <' } ) ).to.equal( '{"a":"\\u003c and \\u003c"}' );
+		} );
+		it( 'should not break standard-non-compliant tools for ">"', () => {
+			expect( serializeAttributes( { a: '> and >' } ) ).to.equal( '{"a":"\\u003e and \\u003e"}' );
+		} );
+		it( 'should not break standard-non-compliant tools for "&"', () => {
+			expect( serializeAttributes( { a: '& and &' } ) ).to.equal( '{"a":"\\u0026 and \\u0026"}' );
+		} );
+	} );
+
 	describe( 'serialize()', () => {
 		it( 'should serialize the post content properly', () => {
 			const blockType = {
@@ -105,11 +120,11 @@ describe( 'block serializer', () => {
 					name: 'core/test-block',
 					attributes: {
 						content: 'Ribs & Chicken',
-						align: 'left',
+						stuff: 'left & right -- but <not>',
 					},
 				},
 			];
-			const expectedPostContent = '<!-- wp:core/test-block {"align":"left"} -->\n<p>Ribs & Chicken</p>\n<!-- /wp:core/test-block -->';
+			const expectedPostContent = '<!-- wp:core/test-block {"stuff":"left \\u0026 right \\u002d\\u002d but \\u003cnot\\u003e"} -->\n<p>Ribs & Chicken</p>\n<!-- /wp:core/test-block -->';
 
 			expect( serialize( blockList ) ).to.eql( expectedPostContent );
 		} );
